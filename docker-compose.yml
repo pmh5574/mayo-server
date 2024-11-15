@@ -1,0 +1,37 @@
+version: '3.8'
+
+services:
+  springboot-blue:
+    image: your-account-id.dkr.ecr.ap-northeast-2.amazonaws.com/${{ secrets.ECR_REPOSITORY }}:latest
+    environment:
+      SPRING_PROFILES_ACTIVE: blue
+      JWT_SECRET_KEY: ${JWT_SECRET_KEY}
+      MARIA_PASSWORD: ${MARIA_PASSWORD}
+      MARIA_USERNAME: ${MARIA_USERNAME}
+      SERVER_HOST: ${SERVER_HOST}
+      SHA_256_SALT: ${SHA_256_SALT}
+      AWS_ACCESS_KEY: ${AWS_ACCESS_KEY}
+      AWS_SECRET_KEY: ${AWS_SECRET_KEY}
+    ports:
+      - "8081:8081"
+    networks:
+      - mayo
+
+  springboot-green:
+    image: your-account-id.dkr.ecr.ap-northeast-2.amazonaws.com/${{ secrets.ECR_REPOSITORY }}:latest
+    environment:
+      SPRING_PROFILES_ACTIVE: green
+      JWT_SECRET_KEY: ${JWT_SECRET_KEY}
+      MARIA_PASSWORD: ${MARIA_PASSWORD}
+      MARIA_USERNAME: ${MARIA_USERNAME}
+      SERVER_HOST: ${SERVER_HOST}
+      SHA_256_SALT: ${SHA_256_SALT}
+      AWS_ACCESS_KEY: ${AWS_ACCESS_KEY}
+      AWS_SECRET_KEY: ${AWS_SECRET_KEY}
+    ports:
+      - "8082:8081"
+    networks:
+      - mayo
+
+networks:
+  mayo:
