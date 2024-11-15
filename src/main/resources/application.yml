@@ -1,0 +1,91 @@
+spring:
+  application:
+    name: mayo-server
+    env: local
+  servlet:
+    multipart:
+      max-file-size: 5MB
+      max-request-size: 5MB
+  mvc:
+    async:
+      request-timeout: -1
+    throw-exception-if-no-handler-found: true
+    pathmatch:
+      matching-strategy: ant-path-matcher
+  cache:
+    type: redis
+    redis:
+      time-to-live: 3600
+  data:
+    redis:
+      host: ${SERVER_HOST}
+      port: 6379
+      database: 0
+      client-type: lettuce
+      timeout: 100000
+      connect-timeout: 30000
+      repositories:
+        enabled: false
+  datasource:
+    driver-class-name: org.mariadb.jdbc.Driver
+    url: jdbc:mariadb://${SERVER_HOST}:3306/mayo
+    username: ${MARIA_USERNAME}
+    password: ${MARIA_PASSWORD}
+    hikari:
+      max-lifetime: 170000
+      connection-timeout: 8000
+      auto-commit: false
+      connection-test-query: SELECT 1
+      transaction-isolation: TRANSACTION_READ_UNCOMMITTED
+  second-datasource:
+    driver-class-name: org.postgresql.Driver
+    url: jdbc:postgresql://${POSTGRESQL_HOST}:3306/mayo
+    username: ${POSTGRESQL_USERNAME}
+    password: ${POSTGRESQL_PASSWORD}
+    hikari:
+      max-lifetime: 170000
+      connection-timeout: 8000
+      auto-commit: false
+      connection-test-query: SELECT 1
+      transaction-isolation: TRANSACTION_READ_UNCOMMITTED
+  jpa:
+    properties:
+      jakarta:
+        persistence:
+          sharedCache:
+            mode: ALL
+      hibernate:
+        format_sql: true
+        implicit_naming_strategy: org.springframework.boot.orm.jpa.hibernate.SpringImplicitNamingStrategy
+        physical_naming_strategy: org.hibernate.boot.model.naming.CamelCaseToUnderscoresNamingStrategy
+        hbm2ddl.auto: none
+        jdbc:
+          batch_size: 10
+        dialect: org.hibernate.dialect.MariaDBDialect
+    hibernate:
+      ddl-auto: create
+    open-in-view: false
+    show-sql: false
+  aws:
+    credentials:
+      access: ${AWS_ACCESS_KEY}
+      secret: ${AWS_SECRET_KEY}
+      cf: ${AWS_CF_DISTRIBUTION}
+secret:
+  sha256-salt: ${SHA_256_SALT}
+
+management:
+  endpoint:
+  endpoints:
+    web:
+      base-path: /health-check
+
+jwt:
+  secret-key: ${JWT_SECRET_KEY}
+  access-expire-time: 3600
+  refresh-expire-time: 86400
+
+cloud:
+  aws:
+    s3:
+      bucket: mayo-ap-northeast-2-s3
