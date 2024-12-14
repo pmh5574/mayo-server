@@ -17,12 +17,11 @@ public interface CustomerRepository extends JpaRepository<Customer, Long> {
 
     Optional<Customer> findByCustomerEmailAndCustomerName(String email, String name);
 
-    Optional<Customer> findByCustomerUsernameAndCustomerPhoneAndCustomerNameAndCustomerBirthday(String username, String phone, String name,
-                                                                                                final String birthday);
-
-    Optional<Customer> findByCustomerUsernameAndCustomerPhone(String username, String phone);
+    Optional<Customer> findByCustomerUsernameAndCustomerPhoneAndCustomerNameAndCustomerBirthday(String username, String phone, String name, String birthday);
 
     Optional<Customer> findByCustomerUsernameAndCustomerEmailAndCustomerNameAndCustomerBirthday(String username, String email, String name, String birthday);
+
+    Optional<Customer> findByCustomerUsernameAndCustomerPhone(String username, String phone);
 
     Optional<Customer> findByCustomerUsernameAndCustomerEmail(String username, String email);
 }

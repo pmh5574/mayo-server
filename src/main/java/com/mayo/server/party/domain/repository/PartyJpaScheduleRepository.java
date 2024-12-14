@@ -70,29 +70,12 @@ public interface PartyJpaScheduleRepository extends JpaRepository<PartySchedule,
             WHERE ps.chef.id = :id
                 AND ps.isMatched = 1
                 AND chp.partyStatus = 'COMPLETED'
-                AND ps.createdAt BETWEEN :startAt AND :endAt
+                AND chp.partySchedule > :endAt
             """)
     List<ChefPartyWaitingDto> findCompletedPartiesByChefId(
             @Param("id") Long id,
-            @Param("startAt") String startAt,
-            @Param("endAt") String endAt,
+            @Param("endAt") LocalDateTime endAt,
             Pageable pageable
-    );
-
-    @EntityGraph(attributePaths = {"customerHomeParty", "customer"})
-    @Query("""
-            SELECT COUNT(ps)
-            FROM PartySchedule ps
-            LEFT JOIN CustomerHomeParty AS chp ON ps.customerHomeParty.customerHomePartyId = chp.customerHomePartyId
-            WHERE ps.chef.id = :id
-                AND ps.isMatched = 1
-                AND chp.partyStatus = 'COMPLETED'
-                AND ps.createdAt BETWEEN :startAt AND :endAt
-            """)
-    Long countCompletedPartiesByChefId(
-            @Param("id") Long id,
-            @Param("startAt") String startAt,
-            @Param("endAt") String endAt
     );
 
     @EntityGraph(attributePaths = {"customerHomeParty", "customer"})
@@ -107,14 +90,11 @@ public interface PartyJpaScheduleRepository extends JpaRepository<PartySchedule,
             WHERE ps.chef.id = :id
                 AND ps.isMatched = 1
                 AND chp.partySchedule < :createdAt
-                AND ps.createdAt BETWEEN :startAt AND :endAt
             ORDER BY chp.createdAt DESC
             """)
     List<ChefPartyWaitingDto> findPartiesByChefIdAndScheduleBefore(
             @Param("id") Long id,
             @Param("createdAt") LocalDateTime createdAt,
-            @Param("startAt") String startAt,
-            @Param("endAt") String endAt,
             Pageable pageable
     );
 

@@ -44,7 +44,7 @@ public class PartyBoardResponse {
             return homePartyList.stream().map(
                     homeParty -> new HomeParty(
                             homeParty.getCustomerHomePartyId(),
-                            homeParty.getPartyComment(),
+                            homeParty.getPartyInfo(),
                             homeParty.getPartySchedule(),
                             homeParty.getNumberOfPeople(),
                             homeParty.getBudget(),

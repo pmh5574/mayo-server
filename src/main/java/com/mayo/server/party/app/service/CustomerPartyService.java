@@ -9,11 +9,13 @@ import com.mayo.server.customer.domain.model.Kitchen;
 import com.mayo.server.party.adapter.in.web.CustomerPartyChefRegisterRequest;
 import com.mayo.server.party.adapter.in.web.CustomerPartyFinishSearchRequest;
 import com.mayo.server.party.adapter.in.web.CustomerPartyRegisterRequest;
+import com.mayo.server.party.adapter.out.persistence.HomePartyFinishListResponse;
 import com.mayo.server.party.adapter.out.persistence.HomePartyStatusResponse;
 import com.mayo.server.party.app.port.in.CustomerPartyQueryInputPort;
 import com.mayo.server.party.app.port.out.ChefNotSelectedDto;
 import com.mayo.server.party.app.port.out.HomePartyDetail;
 import com.mayo.server.party.app.port.out.HomePartyFinishListDto;
+import com.mayo.server.party.app.port.out.HomePartyNoReviewFinishListDto;
 import com.mayo.server.party.app.port.out.HomePartyRegisterKitchenListDto;
 import com.mayo.server.party.app.port.out.HomePartyStatusListDto;
 import com.mayo.server.party.domain.enums.HomePartyStatus;
@@ -116,15 +118,22 @@ public class CustomerPartyService {
         return customerPartyQueryInputPort.getPartyDetail(homePartyId, userId, statuses);
     }
 
-    public List<HomePartyFinishListDto> getFinishPartyList(
+    public HomePartyFinishListResponse getFinishPartyList(
             final CustomerPartyFinishSearchRequest customerPartyFinishSearchRequest, final String token) {
         Long userId = jwtService.getJwtUserId(token);
 
-        return customerPartyQueryInputPort.getFinishPartyList(
+        HomePartyStatus finish = HomePartyStatus.FINISH;
+        Long finishPartyListTotalCount = customerPartyQueryInputPort.getFinishPartyListTotalCount(
+                customerPartyFinishSearchRequest.startDate(), customerPartyFinishSearchRequest.endDate(), userId,
+                finish);
+
+        List<HomePartyFinishListDto> finishPartyList = customerPartyQueryInputPort.getFinishPartyList(
                 customerPartyFinishSearchRequest,
                 userId,
-                HomePartyStatus.FINISH,
+                finish,
                 new PaginationDto(customerPartyFinishSearchRequest.page(), PAGE_SIZE, SORT).getPageRequest());
+
+        return new HomePartyFinishListResponse(finishPartyList, finishPartyListTotalCount);
     }
 
     public List<HomePartyRegisterKitchenListDto> getKitchenList(final String token) {
@@ -175,5 +184,10 @@ public class CustomerPartyService {
         if (Objects.equals(isMatched, IS_MATCHED)) {
             throw new DuplicateException(ErrorCode.PARTY_SCHEDULE_NOT_FOUND);
         }
+    }
+
+    public List<HomePartyNoReviewFinishListDto> getFinishPartyNoReviewList(final String token) {
+        Long userId = jwtService.getJwtUserId(token);
+        return customerPartyQueryInputPort.getFinishPartyNoReviewList(userId, HomePartyStatus.FINISH);
     }
 }

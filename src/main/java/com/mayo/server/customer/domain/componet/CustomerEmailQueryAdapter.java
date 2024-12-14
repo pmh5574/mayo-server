@@ -3,7 +3,6 @@ package com.mayo.server.customer.domain.componet;
 import com.mayo.server.common.annotation.Adapter;
 import com.mayo.server.common.enums.ErrorCode;
 import com.mayo.server.common.exception.NotEqualException;
-import com.mayo.server.common.exception.NotFoundException;
 import com.mayo.server.customer.app.port.in.CustomerEmailQueryInputPort;
 import com.mayo.server.customer.domain.enums.CustomerVerificationStatus;
 import com.mayo.server.customer.domain.model.CustomerEmail;
@@ -52,6 +51,6 @@ public class CustomerEmailQueryAdapter implements CustomerEmailQueryInputPort {
     public void checkFindIdByEmailAndAuthCodeAndStatus(final String email, final String authCode,
                                                        final CustomerVerificationStatus customerVerificationStatus) {
         customerEmailRepository.findByAuthCodeAndEmailAndVerificationStatus(authCode, email, customerVerificationStatus)
-                .orElseThrow(() -> new NotFoundException(ErrorCode.CUSTOMER_PASSWORD_CHECK_INVALID_REQUEST_ERROR));
+                .orElseThrow(() -> new NotEqualException(ErrorCode.EMAIL_AUTH_NUMBER_NOT_EQUALS));
     }
 }

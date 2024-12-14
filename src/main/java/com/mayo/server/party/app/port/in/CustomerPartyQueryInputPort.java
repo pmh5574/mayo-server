@@ -8,6 +8,7 @@ import com.mayo.server.party.adapter.in.web.CustomerPartyRegisterRequest;
 import com.mayo.server.party.app.port.out.ChefNotSelectedDto;
 import com.mayo.server.party.app.port.out.HomePartyDetail;
 import com.mayo.server.party.app.port.out.HomePartyFinishListDto;
+import com.mayo.server.party.app.port.out.HomePartyNoReviewFinishListDto;
 import com.mayo.server.party.domain.enums.HomePartyStatus;
 import com.mayo.server.party.domain.model.CustomerHomeParty;
 import com.mayo.server.party.domain.model.PartySchedule;
@@ -41,4 +42,7 @@ public interface CustomerPartyQueryInputPort {
 
     PartySchedule getPartySchedule(Long partyScheduleId, Long userId);
 
+    List<HomePartyNoReviewFinishListDto> getFinishPartyNoReviewList(Long userId, HomePartyStatus homePartyStatus);
+
+    Long getFinishPartyListTotalCount(String startDate, String endDate, Long userId, HomePartyStatus finish);
 }

@@ -14,7 +14,8 @@ public class CustomerBoardQueryAdapter implements CustomerBoardQueryInputPort {
     private final ChefJpaRepository chefJpaRepository;
 
     @Override
-    public List<ChefSearch> searchChefAll(final String keyword) {
-        return chefJpaRepository.getSearchListAll(keyword);
+    public List<ChefSearch> searchChefAll(final List<String> categories, final List<String> services,
+                                          final List<String> areas) {
+        return chefJpaRepository.getSearchListAll(categories, services, areas);
     }
 }

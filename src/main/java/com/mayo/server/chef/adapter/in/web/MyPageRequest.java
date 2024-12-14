@@ -34,26 +34,42 @@ public class MyPageRequest {
 
     public record ProfileRequest (
 
+            @NotNull(message = "experience is not null")
+            @NotEmpty(message = "experience is not empty")
             String experience,
 
+            @NotNull(message = "comment is not null")
+            @NotEmpty(message = "comment is not empty")
             String comment,
 
+            @NotNull(message = "hashtags is not null")
             List<String> hashtags,
 
+            @NotNull(message = "activeRegion is not null")
+            @NotEmpty(message = "activeRegion is not empty")
             String activeRegion,
 
+            @NotNull(message = "description is not null")
+            @NotEmpty(message = "description is not empty")
             String description,
 
+            @NotNull(message = "additionalInfo is not null")
+            @NotEmpty(message = "additionalInfo is not empty")
             String additionalInfo,
 
+            @NotNull(message = "hopePay is not null")
             Long hopePay,
 
+            @NotNull(message = "minServiceTime is not null")
             Integer minServiceTime,
 
+            @NotNull(message = "serviceList is not null")
             List<String> serviceList,
 
+            @NotNull(message = "portfolio is not null")
             List<MappingImage> portfolio,
 
+            @NotNull(message = "license is not null")
             List<MappingImage> license
     ) {
 

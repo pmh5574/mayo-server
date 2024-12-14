@@ -8,13 +8,13 @@ import com.mayo.server.customer.app.port.in.CustomerEmailQueryInputPort;
 import com.mayo.server.customer.app.port.in.CustomerMyPageQueryInputPort;
 import com.mayo.server.customer.app.port.in.CustomerPhoneQueryInputPort;
 import com.mayo.server.customer.app.port.in.CustomerQueryInputPort;
+import com.mayo.server.customer.app.port.in.CustomerTransformedSaveImage;
 import com.mayo.server.customer.app.port.in.KitchenQueryInputPort;
 import com.mayo.server.customer.app.port.out.CustomerKitchenListDto;
 import com.mayo.server.customer.domain.enums.CustomerVerificationStatus;
 import com.mayo.server.customer.domain.enums.KitchenMainStatus;
 import com.mayo.server.customer.domain.model.Customer;
 import com.mayo.server.customer.domain.model.Kitchen;
-import com.mayo.server.customer.domain.model.KitchenImages;
 import com.mayo.server.customer.domain.model.KitchenTools;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
@@ -44,8 +44,8 @@ public class CustomerMyPageQueryAdapter implements CustomerMyPageQueryInputPort 
     }
 
     @Override
-    public List<KitchenImages> postImages(final List<KitchenImagesRegister> kitchenImagesRegisters,
-                                    final Long userId) {
+    public List<CustomerTransformedSaveImage> postImages(final List<KitchenImagesRegister> kitchenImagesRegisters,
+                                                         final Long userId) {
         return kitchenQueryInputPort.postKitchenImages(kitchenImagesRegisters, userId);
     }
 
@@ -60,7 +60,7 @@ public class CustomerMyPageQueryAdapter implements CustomerMyPageQueryInputPort 
     }
 
     @Override
-    public List<KitchenImages> editImages(final List<KitchenImagesRegister> kitchenImagesRegisters, final Long userId) {
+    public List<CustomerTransformedSaveImage> editImages(final List<KitchenImagesRegister> kitchenImagesRegisters, final Long userId) {
         return kitchenQueryInputPort.editKitchenImages(kitchenImagesRegisters, userId);
     }
 
@@ -106,7 +106,6 @@ public class CustomerMyPageQueryAdapter implements CustomerMyPageQueryInputPort 
 
     @Override
     public Kitchen getMainKitchen(final Long userId, final KitchenMainStatus status) {
-        kitchenQueryInputPort.getMainKitchen(userId, status);
-        return null;
+        return kitchenQueryInputPort.getMainKitchen(userId, status);
     }
 }

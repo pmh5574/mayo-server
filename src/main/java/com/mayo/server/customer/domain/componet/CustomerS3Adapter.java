@@ -3,8 +3,8 @@ package com.mayo.server.customer.domain.componet;
 import com.mayo.server.common.annotation.Adapter;
 import com.mayo.server.common.enums.UserType;
 import com.mayo.server.customer.adapter.in.web.KitchenImagesRegister;
-import com.mayo.server.customer.app.port.in.CustomerTransformedImage;
 import com.mayo.server.customer.app.port.in.CustomerS3InputPort;
+import com.mayo.server.customer.app.port.in.CustomerTransformedSaveImage;
 import com.mayo.server.customer.infra.CustomerS3Client;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
@@ -20,13 +20,25 @@ public class CustomerS3Adapter implements CustomerS3InputPort {
     private String AWS_CF_DISTRIBUTION;
 
     @Override
-    public List<CustomerTransformedImage> postKitchenImages(final List<KitchenImagesRegister> kitchenImagesRegisters, final Long userId) {
+    public List<CustomerTransformedSaveImage> postKitchenImages(final List<KitchenImagesRegister> kitchenImagesRegisters, final Long userId) {
         return kitchenImagesRegisters.stream()
-                .map(kitchenImagesRegister ->
-                        new CustomerTransformedImage(
-                                kitchenImagesRegister.id(),
-                                customerS3Client.getPreSignedUrl(getImagePrefix(kitchenImagesRegister, userId))))
+                .map(kitchenImagesRegister -> {
+
+                    String imagePrefix = getImagePrefix(kitchenImagesRegister, userId);
+                    customerS3Client.getPreSignedUrl(imagePrefix);
+
+                    return new CustomerTransformedSaveImage(
+                            kitchenImagesRegister.id(),
+                            getCloudFrontSignedUrl(imagePrefix),
+                            customerS3Client.getPreSignedUrl(imagePrefix)
+                    );
+                })
                 .toList();
+    }
+
+    @Override
+    public String getCloudFrontSignedUrl(String imageKey) {
+        return AWS_CF_DISTRIBUTION + "/" + imageKey;
     }
 
     @Override

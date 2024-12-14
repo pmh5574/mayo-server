@@ -1,11 +1,18 @@
 package com.mayo.server.party.adapter.in.web;
 
-import jakarta.validation.constraints.NotBlank;
-import jakarta.validation.constraints.NotNull;
+import java.util.List;
+import java.util.Objects;
 
 public record CustomerPartySearchRequest(
-        @NotNull(message = "검색어를 입력해주세요.")
-        @NotBlank(message = "검색어를 입력해주세요.")
-        String keyword
+
+        List<String> categories,
+        List<String> services,
+        List<String> areas
 ) {
+        public CustomerPartySearchRequest(final List<String> categories, final List<String> services,
+                                          final List<String> areas) {
+                this.categories = Objects.requireNonNullElse(categories, List.of());
+                this.services = Objects.requireNonNullElse(services, List.of());
+                this.areas = Objects.requireNonNullElse(areas, List.of());
+        }
 }

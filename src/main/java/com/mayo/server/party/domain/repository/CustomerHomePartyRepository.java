@@ -4,6 +4,7 @@ import com.mayo.server.party.app.port.out.MyHomePartyDto;
 import com.mayo.server.party.domain.enums.HomePartyStatus;
 import com.mayo.server.party.domain.model.CustomerHomeParty;
 
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
 
@@ -37,7 +38,7 @@ public interface CustomerHomePartyRepository extends JpaRepository<CustomerHomeP
     List<CustomerHomeParty> findAllByChef_Id(@Param("id") Long id);
 
     @Query("""
-    SELECT new com.mayo.server.party.app.port.out.MyHomePartyDto(
+    SELECT DISTINCT new com.mayo.server.party.app.port.out.MyHomePartyDto(
         chp.partyInfo,
         k.address,
         chp.partySchedule,
@@ -47,8 +48,13 @@ public interface CustomerHomePartyRepository extends JpaRepository<CustomerHomeP
         chp.createdAt
     )
     FROM CustomerHomeParty AS chp
-        LEFT JOIN Kitchen AS k ON k.customer.id = chp.customer.id
+        INNER JOIN Kitchen AS k ON k.customer.id = chp.customer.id
     WHERE chp.customerHomePartyId IN :ids
+        AND k.createdAt = (
+                SELECT MAX(k2.createdAt)
+                FROM Kitchen k2
+                WHERE k2.customer.id = chp.customer.id
+            )
     """)
     List<MyHomePartyDto> findAllByCustomerHomePartyId(@Param("ids") List<Long> ids);
 
@@ -61,4 +67,5 @@ public interface CustomerHomePartyRepository extends JpaRepository<CustomerHomeP
             @Param("status") HomePartyStatus status
     );
 
+    Long countByCustomerIdAndPartyStatusAndPartyScheduleBetween(Long userId, HomePartyStatus finish, LocalDateTime startDate, LocalDateTime endDate);
 }

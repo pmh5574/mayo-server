@@ -6,7 +6,6 @@ import com.mayo.server.customer.adapter.in.web.KitchenToolsRegister;
 import com.mayo.server.customer.app.port.out.CustomerKitchenListDto;
 import com.mayo.server.customer.domain.enums.KitchenMainStatus;
 import com.mayo.server.customer.domain.model.Kitchen;
-import com.mayo.server.customer.domain.model.KitchenImages;
 import com.mayo.server.customer.domain.model.KitchenTools;
 import java.util.List;
 
@@ -14,14 +13,14 @@ public interface KitchenQueryInputPort {
 
     Kitchen postKitchen(KitchenRegister kitchenRegister);
 
-    List<KitchenImages> postKitchenImages(List<KitchenImagesRegister> kitchenImagesRegisters,
+    List<CustomerTransformedSaveImage> postKitchenImages(List<KitchenImagesRegister> kitchenImagesRegisters,
                                     Long userId);
 
     List<KitchenTools> postKitchenTools(List<KitchenToolsRegister> kitchenToolsRegisters);
 
     Kitchen findByKitchen(Long kitchenId);
 
-    List<KitchenImages> editKitchenImages(List<KitchenImagesRegister> kitchenImagesRegisters, Long userId);
+    List<CustomerTransformedSaveImage> editKitchenImages(List<KitchenImagesRegister> kitchenImagesRegisters, Long userId);
 
     List<KitchenTools> editKitchenTools(List<KitchenToolsRegister> kitchenToolsRegisters);
 

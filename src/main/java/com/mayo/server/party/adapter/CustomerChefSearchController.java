@@ -21,9 +21,9 @@ import org.springframework.web.bind.annotation.RestController;
 
 @Tag(name = "고객 게시판", description = "고객 게시판 API")
 @RequiredArgsConstructor
-@RequestMapping("/customer/board")
+@RequestMapping("/customer/chef/search")
 @RestController
-public class CustomerBoardController {
+public class CustomerChefSearchController {
 
     private final CustomerBoardService customerBoardService;
 
@@ -31,7 +31,7 @@ public class CustomerBoardController {
     @ApiResponse(responseCode = "200", content = {@Content(schema = @Schema(
             implementation = List.class))})
     @PublicAccess
-    @GetMapping("/search")
+    @GetMapping("")
     public Callable<Response<List<ChefSearch>>> getSearchChefAll(@ModelAttribute @Validated final CustomerPartySearchRequest customerPartySearchRequest) {
         return () -> new Response<>(customerBoardService.getSearchChefAll(customerPartySearchRequest));
     }

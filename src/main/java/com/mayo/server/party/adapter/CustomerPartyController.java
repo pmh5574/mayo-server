@@ -5,10 +5,11 @@ import com.mayo.server.common.swagger.BaseResponse;
 import com.mayo.server.party.adapter.in.web.CustomerPartyChefRegisterRequest;
 import com.mayo.server.party.adapter.in.web.CustomerPartyFinishSearchRequest;
 import com.mayo.server.party.adapter.in.web.CustomerPartyRegisterRequest;
+import com.mayo.server.party.adapter.out.persistence.HomePartyFinishListResponse;
 import com.mayo.server.party.adapter.out.persistence.HomePartyStatusResponse;
 import com.mayo.server.party.app.port.out.ChefNotSelectedDto;
 import com.mayo.server.party.app.port.out.HomePartyDetail;
-import com.mayo.server.party.app.port.out.HomePartyFinishListDto;
+import com.mayo.server.party.app.port.out.HomePartyNoReviewFinishListDto;
 import com.mayo.server.party.app.port.out.HomePartyRegisterKitchenListDto;
 import com.mayo.server.party.app.service.CustomerPartyService;
 import io.swagger.v3.oas.annotations.Operation;
@@ -78,12 +79,21 @@ public class CustomerPartyController {
 
     @Operation(summary = "고객 홈파티 이용 완료 내역")
     @ApiResponse(responseCode = "200", content = {@Content(schema = @Schema(
-            implementation = List.class))})
+            implementation = HomePartyFinishListResponse.class))})
     @GetMapping("/finish/list")
-    public Callable<Response<List<HomePartyFinishListDto>>> getFinishParty(
+    public Callable<Response<HomePartyFinishListResponse>> getFinishParty(
             @ModelAttribute @Validated final CustomerPartyFinishSearchRequest customerPartyFinishSearchRequest,
             @RequestHeader("Authorization") final String token) {
         return () -> new Response<>(customerPartyService.getFinishPartyList(customerPartyFinishSearchRequest, token));
+    }
+
+    @Operation(summary = "고객 홈파티 리뷰 없는 이용 완료 내역")
+    @ApiResponse(responseCode = "200", content = {@Content(schema = @Schema(
+            implementation = List.class))})
+    @GetMapping("/finish/no-review/list")
+    public Callable<Response<List<HomePartyNoReviewFinishListDto>>> getFinishPartyNoReview(
+            @RequestHeader("Authorization") final String token) {
+        return () -> new Response<>(customerPartyService.getFinishPartyNoReviewList(token));
     }
 
     @Operation(summary = "홈파티 등록시 주방 조회")

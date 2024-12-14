@@ -7,10 +7,15 @@ public record ChefSearch(
         String chefName,
         String chefInfoExperience,
         String chefInfoAdditional,
+        Long hopePay,
         List<ChefSearchHashTag> chefHashList
 ) {
 
     public String getId() {
         return String.valueOf(id);
+    }
+
+    public String getHopePay() {
+        return String.valueOf(hopePay);
     }
 }

@@ -143,7 +143,7 @@ public class PartyQueryAdapter implements PartyOutputPort {
 
     @Override
     public List<PartyApplyResponse.MatchingList> getMatchedList(Long id,PaginationWithTimeDto dto) {
-        return partyJpaScheduleRepository.findCompletedPartiesByChefId(id, dto.getUTCPlainStart(), dto.getUTCPlainEnd(), dto.getPageRequest()).stream().map(v ->
+        return partyJpaScheduleRepository.findCompletedPartiesByChefId(id, DateUtility.getLocalUTC0String(Constants.yyyy_MM_DD_HH_mm_ss), dto.getPageRequest()).stream().map(v ->
                 new PartyApplyResponse.MatchingList(
                 v.id(),
                 v.info(),
@@ -155,7 +155,6 @@ public class PartyQueryAdapter implements PartyOutputPort {
         return partyJpaScheduleRepository.findPartiesByChefIdAndScheduleBefore(
                 id,
                 DateUtility.getLocalUTC0String(Constants.yyyy_MM_DD_HH_mm_ss),
-                dto.getUTCPlainStart(), dto.getUTCPlainEnd(),
                 dto.getPageRequest()
         ).stream().map(v ->
                 new PartyApplyResponse.VisitList(

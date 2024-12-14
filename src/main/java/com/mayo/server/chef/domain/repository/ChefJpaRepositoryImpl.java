@@ -27,11 +27,18 @@ public class ChefJpaRepositoryImpl implements ChefJpaRepositoryCustom {
     private final JPAQueryFactory jpaQueryFactory;
 
     @Override
-    public List<ChefSearch> getSearchListAll(final String keyword) {
+    public List<ChefSearch> getSearchListAll(final List<String> categories, final List<String> services, final List<String> areas) {
 
         BooleanBuilder builder = new BooleanBuilder();
-        builder.or(chefHashTag1.chefHashTag.containsIgnoreCase(keyword));
-        builder.or(chefInformation.chefInfoExperience.containsIgnoreCase(keyword));
+        if (!services.isEmpty()) {
+            services.forEach(service -> builder.or(chefHashTag1.chefHashTag.containsIgnoreCase(service)));
+        }
+        if (!categories.isEmpty()) {
+            categories.forEach(category -> builder.or(chefHashTag1.chefHashTag.containsIgnoreCase(category)));
+        }
+        if (!areas.isEmpty()) {
+            areas.forEach(area -> builder.or(chefInformation.chefInfoRegion.containsIgnoreCase(area)));
+        }
 
         List<Long> chefIds = jpaQueryFactory
                 .select(chef.id)
@@ -56,6 +63,7 @@ public class ChefJpaRepositoryImpl implements ChefJpaRepositoryCustom {
                                         chef.chefName,
                                         chefInformation.chefInfoExperience,
                                         chefInformation.chefInfoAdditional,
+                                        chefInformation.hopePay,
                                         list(
                                             Projections.constructor(ChefSearchHashTag.class,
                                                 chefHashTag1.id,

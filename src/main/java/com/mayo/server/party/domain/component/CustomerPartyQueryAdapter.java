@@ -1,9 +1,11 @@
 package com.mayo.server.party.domain.component;
 
 import com.mayo.server.chef.domain.model.Chef;
+import com.mayo.server.common.Constants;
 import com.mayo.server.common.annotation.Adapter;
 import com.mayo.server.common.enums.ErrorCode;
 import com.mayo.server.common.exception.NotFoundException;
+import com.mayo.server.common.utility.DateUtility;
 import com.mayo.server.customer.app.port.in.CustomerQueryInputPort;
 import com.mayo.server.customer.app.port.in.KitchenQueryInputPort;
 import com.mayo.server.customer.domain.model.Customer;
@@ -16,6 +18,7 @@ import com.mayo.server.party.app.port.in.CustomerPartyQueryInputPort;
 import com.mayo.server.party.app.port.out.ChefNotSelectedDto;
 import com.mayo.server.party.app.port.out.HomePartyDetail;
 import com.mayo.server.party.app.port.out.HomePartyFinishListDto;
+import com.mayo.server.party.app.port.out.HomePartyNoReviewFinishListDto;
 import com.mayo.server.party.domain.enums.CustomerPartyServices;
 import com.mayo.server.party.domain.enums.HomePartyStatus;
 import com.mayo.server.party.domain.model.CustomerHomeParty;
@@ -170,5 +173,21 @@ public class CustomerPartyQueryAdapter implements CustomerPartyQueryInputPort {
     public PartySchedule getPartySchedule(final Long partyScheduleId, final Long userId) {
         return partyJpaScheduleRepository.findByIdAndCustomerId(partyScheduleId, userId)
                 .orElseThrow(() -> new NotFoundException(ErrorCode.PARTY_SCHEDULE_NOT_FOUND));
+    }
+
+    @Override
+    public List<HomePartyNoReviewFinishListDto> getFinishPartyNoReviewList(final Long userId,
+                                                                           final HomePartyStatus homePartyStatus) {
+        return customerHomePartyRepository.getFinishPartyNoReviewList(userId, homePartyStatus);
+    }
+
+    @Override
+    public Long getFinishPartyListTotalCount(final String startDate, final String endDate, final Long userId,
+                                             final HomePartyStatus finish) {
+        return customerHomePartyRepository.countByCustomerIdAndPartyStatusAndPartyScheduleBetween(
+                userId,
+                finish,
+                DateUtility.parsedStringToLocaleDate(startDate + "000000", Constants.yyyyMMDDHHmmss),
+                DateUtility.parsedStringToLocaleDate(endDate + "235959", Constants.yyyyMMDDHHmmss));
     }
 }

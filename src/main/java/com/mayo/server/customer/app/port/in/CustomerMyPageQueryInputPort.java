@@ -8,7 +8,6 @@ import com.mayo.server.customer.domain.enums.CustomerVerificationStatus;
 import com.mayo.server.customer.domain.enums.KitchenMainStatus;
 import com.mayo.server.customer.domain.model.Customer;
 import com.mayo.server.customer.domain.model.Kitchen;
-import com.mayo.server.customer.domain.model.KitchenImages;
 import com.mayo.server.customer.domain.model.KitchenTools;
 import java.util.List;
 
@@ -17,13 +16,13 @@ public interface CustomerMyPageQueryInputPort {
 
     Kitchen postKitchen(KitchenRegister kitchenRegister, Long userId);
 
-    List<KitchenImages> postImages(List<KitchenImagesRegister> kitchenImagesRegisters, Long userId);
+    List<CustomerTransformedSaveImage> postImages(List<KitchenImagesRegister> kitchenImagesRegisters, Long userId);
 
     List<KitchenTools> postTools(List<KitchenToolsRegister> kitchenToolsRegisters);
 
     Kitchen findByKitchen(Long kitchenId);
 
-    List<KitchenImages> editImages(List<KitchenImagesRegister> kitchenImagesRegisters, Long userId);
+    List<CustomerTransformedSaveImage> editImages(List<KitchenImagesRegister> kitchenImagesRegisters, Long userId);
 
     List<KitchenTools> editTools(List<KitchenToolsRegister> kitchenToolsRegisters);
 

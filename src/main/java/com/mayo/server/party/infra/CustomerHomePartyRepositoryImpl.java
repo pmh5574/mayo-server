@@ -24,6 +24,7 @@ import com.mayo.server.party.app.port.out.HomePartyChefDetail;
 import com.mayo.server.party.app.port.out.HomePartyDetail;
 import com.mayo.server.party.app.port.out.HomePartyFinishListDto;
 import com.mayo.server.party.app.port.out.HomePartyKitchenDetail;
+import com.mayo.server.party.app.port.out.HomePartyNoReviewFinishListDto;
 import com.mayo.server.party.domain.enums.HomePartyStatus;
 import com.mayo.server.party.domain.model.CustomerHomeParty;
 import com.mayo.server.party.domain.model.QCustomerHomeParty;
@@ -33,6 +34,7 @@ import com.querydsl.core.types.Projections;
 import com.querydsl.jpa.impl.JPAQuery;
 import com.querydsl.jpa.impl.JPAQueryFactory;
 import java.time.LocalDateTime;
+import java.time.ZoneOffset;
 import java.util.List;
 import java.util.Optional;
 import lombok.RequiredArgsConstructor;
@@ -287,16 +289,19 @@ public class CustomerHomePartyRepositoryImpl implements CustomerHomPartyReposito
 
     @Override
     public List<Long> getMyMatchedHomePartyIds(Long chefId, PaginationWithTimeDto dto, MyHomePartyListRequest req) {
+
         return this.getMyMatchedHomePartyIds(chefId, dto.getPageRequest(), req.days());
     }
 
     private List<Long> getMyMatchedHomePartyIds(Long chefId, Pageable pageable, List<String> days) {
 
         JPAQuery<Long> idQuery = queryFactory
-                .select(partySchedule.customerHomeParty.customerHomePartyId)
+                .selectDistinct(partySchedule.customerHomeParty.customerHomePartyId)
                 .from(partySchedule)
                 .leftJoin(customerHomeParty).on(partySchedule.customerHomeParty.customerHomePartyId.eq(customerHomeParty.customerHomePartyId))
                 .fetchJoin();
+
+        LocalDateTime curr = DateUtility.getLocalUTC0String(Constants.yyyy_MM_DD_HH_mm_ss);
 
         BooleanBuilder conditions = new BooleanBuilder();
         for (String day : days) {
@@ -304,10 +309,10 @@ public class CustomerHomePartyRepositoryImpl implements CustomerHomPartyReposito
             LocalDateTime startOfDay = date.toLocalDate().atStartOfDay();
             LocalDateTime endOfDay = date.toLocalDate().atTime(23, 59, 59);
 
-            conditions.or(customerHomeParty.partySchedule.between(startOfDay, endOfDay));
+            if(curr.toEpochSecond(ZoneOffset.UTC) < date.toEpochSecond(ZoneOffset.UTC)) {
+                conditions.or(customerHomeParty.partySchedule.between(startOfDay, endOfDay));
+            }
         }
-
-        conditions.and(customerHomeParty.partySchedule.goe(DateUtility.getLocalUTC0String(Constants.yyyy_MM_DD_HH_mm_ss)));
 
         conditions.and((
                 partySchedule.chef.id.eq(chefId)
@@ -317,7 +322,8 @@ public class CustomerHomePartyRepositoryImpl implements CustomerHomPartyReposito
                         .and(
                                 customerHomeParty.partyStatus.in(HomePartyStatus.COMPLETED)
                         )
-        ));
+                )
+        ).and(customerHomeParty.partySchedule.gt(DateUtility.getLocalUTC0String(Constants.yyyy_MM_DD_HH_mm_ss)));
 
         idQuery.where(conditions);
 
@@ -408,13 +414,17 @@ public class CustomerHomePartyRepositoryImpl implements CustomerHomPartyReposito
                 .leftJoin(customerHomeParty).on(partySchedule.customerHomeParty.customerHomePartyId.eq(customerHomeParty.customerHomePartyId))
                 .fetchJoin();
 
+        LocalDateTime curr = DateUtility.getLocalUTC0String(Constants.yyyy_MM_DD_HH_mm_ss);
+
         BooleanBuilder conditions = new BooleanBuilder();
         for (String day : req.days()) {
             LocalDateTime date = DateUtility.parsedStringToLocaleDate(day, Constants.yyyy_MM_DD_HH_mm_ss);
             LocalDateTime startOfDay = date.toLocalDate().atStartOfDay();
             LocalDateTime endOfDay = date.toLocalDate().atTime(23, 59, 59);
 
-            conditions.or(customerHomeParty.partySchedule.between(startOfDay, endOfDay));
+            if(curr.toEpochSecond(ZoneOffset.UTC) < date.toEpochSecond(ZoneOffset.UTC)) {
+                conditions.or(customerHomeParty.partySchedule.between(startOfDay, endOfDay));
+            }
         }
 
         conditions.and(customerHomeParty.partySchedule.goe(DateUtility.getLocalUTC0String(Constants.yyyy_MM_DD_HH_mm_ss)));
@@ -427,7 +437,7 @@ public class CustomerHomePartyRepositoryImpl implements CustomerHomPartyReposito
                         .and(
                                 customerHomeParty.partyStatus.in(HomePartyStatus.COMPLETED)
                         )
-        ));
+        ).and(customerHomeParty.partySchedule.gt(DateUtility.getLocalUTC0String(Constants.yyyy_MM_DD_HH_mm_ss))));
 
         idQuery.where(conditions);
 
@@ -485,5 +495,36 @@ public class CustomerHomePartyRepositoryImpl implements CustomerHomPartyReposito
                 .where(customerHomeParty.customer.id.eq(userId))
                 .orderBy(customerHomeParty.createdAt.desc())
                 .fetch();
+    }
+
+    @Override
+    public List<HomePartyNoReviewFinishListDto> getFinishPartyNoReviewList(final Long userId,
+                                                                   final HomePartyStatus homePartyStatus) {
+        return queryFactory.select(
+                    customerHomeParty, partyReview, chef, chefInformation, customerHomePartyServices
+                        )
+                .from(customerHomeParty)
+                .leftJoin(partyReview).on(partyReview.customerHomeParty.eq(customerHomeParty))
+                .leftJoin(chef).on(customerHomeParty.chef.id.eq(chef.id))
+                .leftJoin(chefInformation).on(chefInformation.chefId.eq(chef.id))
+                .leftJoin(customerHomePartyServices).on(customerHomePartyServices.customerHomeParty.eq(customerHomeParty))
+                .where(customerHomeParty.customer.id.eq(userId)
+                        .and(customerHomeParty.partyStatus.eq(homePartyStatus))
+                        .and(partyReview.isNull())
+                ).transform(
+                        groupBy(customerHomeParty.customerHomePartyId)
+                                .list(
+                                        Projections.constructor(HomePartyNoReviewFinishListDto.class,
+                                                customerHomeParty.customerHomePartyId,
+                                                customerHomeParty.partyInfo,
+                                                customerHomeParty.partySchedule,
+                                                chef.chefName,
+                                                chefInformation.chefInfoExperience,
+                                                chefInformation.chefInfoIntroduce,
+                                                set(customerHomePartyServices.serviceName.stringValue())
+                                        )
+                                )
+
+                );
     }
 }

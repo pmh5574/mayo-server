@@ -7,12 +7,11 @@ import com.mayo.server.customer.adapter.in.web.KitchenImagesRegister;
 import com.mayo.server.customer.adapter.in.web.KitchenRegister;
 import com.mayo.server.customer.adapter.in.web.KitchenToolsRegister;
 import com.mayo.server.customer.app.port.in.CustomerS3InputPort;
-import com.mayo.server.customer.app.port.in.CustomerTransformedImage;
+import com.mayo.server.customer.app.port.in.CustomerTransformedSaveImage;
 import com.mayo.server.customer.app.port.in.KitchenQueryInputPort;
 import com.mayo.server.customer.app.port.out.CustomerKitchenListDto;
 import com.mayo.server.customer.domain.enums.KitchenMainStatus;
 import com.mayo.server.customer.domain.model.Kitchen;
-import com.mayo.server.customer.domain.model.KitchenImages;
 import com.mayo.server.customer.domain.model.KitchenTools;
 import com.mayo.server.customer.domain.repository.KitchenRepository;
 import java.util.List;
@@ -42,18 +41,18 @@ public class KitchenQueryAdapter implements KitchenQueryInputPort {
     }
 
     @Override
-    public List<KitchenImages> postKitchenImages(final List<KitchenImagesRegister> kitchenImagesRegisters, final Long userId) {
+    public List<CustomerTransformedSaveImage> postKitchenImages(final List<KitchenImagesRegister> kitchenImagesRegisters, final Long userId) {
 
-        List<CustomerTransformedImage> customerTransformedImages = customerS3InputPort.postKitchenImages(
+        return customerS3InputPort.postKitchenImages(
                 kitchenImagesRegisters, userId);
 
-        return customerTransformedImages.stream()
-                .map(customerTransformedImage ->
-                        KitchenImages.builder()
-                        .order(customerTransformedImage.id())
-                        .imageName(customerTransformedImage.url())
-                                .build())
-                .toList();
+//        return customerTransformedImages.stream()
+//                .map(customerTransformedImage ->
+//                        KitchenImages.builder()
+//                        .order(customerTransformedImage.id())
+//                        .imageName(customerTransformedImage.url())
+//                                .build())
+//                .toList();
     }
 
     @Override
@@ -70,20 +69,12 @@ public class KitchenQueryAdapter implements KitchenQueryInputPort {
     }
 
     @Override
-    public List<KitchenImages> editKitchenImages(final List<KitchenImagesRegister> kitchenImagesRegisters,
+    public List<CustomerTransformedSaveImage> editKitchenImages(final List<KitchenImagesRegister> kitchenImagesRegisters,
                                                  final Long userId) {
         customerS3InputPort.deleteS3Images(userId);
 
-        List<CustomerTransformedImage> customerTransformedImages = customerS3InputPort.postKitchenImages(
+        return customerS3InputPort.postKitchenImages(
                 kitchenImagesRegisters, userId);
-
-        return customerTransformedImages.stream()
-                .map(customerTransformedImage ->
-                        KitchenImages.builder()
-                                .order(customerTransformedImage.id())
-                                .imageName(customerTransformedImage.url())
-                                .build())
-                .toList();
     }
 
     @Override

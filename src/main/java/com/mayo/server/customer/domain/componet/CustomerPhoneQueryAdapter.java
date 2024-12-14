@@ -3,7 +3,6 @@ package com.mayo.server.customer.domain.componet;
 import com.mayo.server.common.annotation.Adapter;
 import com.mayo.server.common.enums.ErrorCode;
 import com.mayo.server.common.exception.NotEqualException;
-import com.mayo.server.common.exception.NotFoundException;
 import com.mayo.server.customer.app.port.in.CustomerPhoneQueryInputPort;
 import com.mayo.server.customer.domain.enums.CustomerVerificationStatus;
 import com.mayo.server.customer.domain.model.CustomerPhone;
@@ -47,6 +46,6 @@ public class CustomerPhoneQueryAdapter implements CustomerPhoneQueryInputPort {
     public void checkFindIdByPhoneAndAuthCodeAndStatus(final String phone, final String authCode,
                                                        final CustomerVerificationStatus customerVerificationStatus) {
         customerPhoneRepository.findByAuthCodeAndPhoneNumAndVerificationStatus(authCode, phone, customerVerificationStatus)
-                .orElseThrow(() -> new NotFoundException(ErrorCode.CUSTOMER_PASSWORD_CHECK_INVALID_REQUEST_ERROR));
+                .orElseThrow(() -> new NotEqualException(ErrorCode.PHONE_AUTH_NUMBER_NOT_EQUALS));
     }
 }

@@ -17,6 +17,7 @@ import com.mayo.server.customer.adapter.out.persistence.CustomerMainKitchenRespo
 import com.mayo.server.customer.adapter.out.persistence.CustomerMyPageProfile;
 import com.mayo.server.customer.app.port.in.CustomerMyPageQueryInputPort;
 import com.mayo.server.customer.app.port.in.CustomerTransformedImage;
+import com.mayo.server.customer.app.port.in.CustomerTransformedSaveImage;
 import com.mayo.server.customer.app.port.out.CustomerKitchenListDto;
 import com.mayo.server.customer.domain.enums.CustomerVerificationStatus;
 import com.mayo.server.customer.domain.enums.KitchenMainStatus;
@@ -28,6 +29,9 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
+import java.util.function.BiConsumer;
+import java.util.function.Consumer;
+import java.util.function.Supplier;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -63,10 +67,12 @@ public class CustomerMyPageService {
         Kitchen kitchen = customerMyPageQueryInputPort.postKitchen(kitchenRegister, userId);
         setAsMainKitchenIfNoneExists(kitchen, userId);
 
-        checkAndAddImages(kitchenRegister, userId, kitchen);
+        List<CustomerTransformedSaveImage> customerTransformedSaveImages = checkAndAddImages(kitchenRegister, userId);
+        List<KitchenImages> kitchenImagesList = changeImages(customerTransformedSaveImages);
+        addImages(kitchenImagesList, kitchen);
         checkAndAddTools(kitchenRegister, kitchen);
 
-        List<CustomerTransformedImage> customerTransformedImageList = getCustomerTransformedImages(kitchen.getKitchenImagesList());
+        List<CustomerTransformedImage> customerTransformedImageList = getCustomerTransformedImages(customerTransformedSaveImages);
 
         return new CustomerImageListResponse(customerTransformedImageList);
     }
@@ -78,20 +84,19 @@ public class CustomerMyPageService {
         }
     }
 
-    private List<CustomerTransformedImage> getCustomerTransformedImages(final List<KitchenImages> kitchenImagesList) {
-        return kitchenImagesList.stream()
-                .map(kitchenImage -> new CustomerTransformedImage(kitchenImage.getOrder(), kitchenImage.getImageName()))
+    private List<CustomerTransformedImage> getCustomerTransformedImages(final List<CustomerTransformedSaveImage> customerTransformedSaveImageList) {
+        return customerTransformedSaveImageList.stream()
+                .map(customerTransformedSaveImage -> new CustomerTransformedImage(customerTransformedSaveImage.id(), customerTransformedSaveImage.putUrl()))
                 .toList();
     }
 
-    private void checkAndAddImages(final KitchenRegister kitchenRegister, final Long userId, final Kitchen kitchen) {
+    private List<CustomerTransformedSaveImage> checkAndAddImages(final KitchenRegister kitchenRegister, final Long userId) {
         if (!kitchenRegister.kitchenImagesRegisterList().isEmpty()) {
-            List<KitchenImages> kitchenImagesList = customerMyPageQueryInputPort.postImages(
+            return customerMyPageQueryInputPort.postImages(
                     kitchenRegister.kitchenImagesRegisterList(),
                     userId);
-
-            kitchen.addImages(kitchenImagesList);
         }
+        return List.of();
     }
 
     private void checkAndAddTools(final KitchenRegister kitchenRegister, final Kitchen kitchen) {
@@ -110,14 +115,37 @@ public class CustomerMyPageService {
 
         checkKitchenCustomerAndJwtCustomer(userId, kitchen.getCustomer().getId());
 
-        changeImages(kitchenEdit, kitchen);
+        List<CustomerTransformedSaveImage> customerTransformedSaveImages = changeImages(kitchenEdit, kitchen);
+        List<KitchenImages> kitchenImagesList = changeImages(customerTransformedSaveImages);
+        addImages(kitchenImagesList, kitchen);
+
         changeTools(kitchenEdit, kitchen);
 
         kitchen.edit(kitchenEdit);
 
-        List<CustomerTransformedImage> customerTransformedImageList = getCustomerTransformedImages(kitchen.getKitchenImagesList());
+        List<CustomerTransformedImage> customerTransformedImageList = getCustomerTransformedImages(customerTransformedSaveImages);
 
         return new CustomerImageListResponse(customerTransformedImageList);
+    }
+
+    private List<KitchenImages> changeImages(final List<CustomerTransformedSaveImage> customerTransformedSaveImages) {
+        if (customerTransformedSaveImages.isEmpty()) {
+            return List.of();
+        }
+
+        return customerTransformedSaveImages.stream()
+                .map(customerTransformedSaveImage -> KitchenImages.builder()
+                        .order(customerTransformedSaveImage.id())
+                        .imageName(customerTransformedSaveImage.getUrl())
+                        .build())
+                .toList();
+    }
+
+    private void addImages(final List<KitchenImages> kitchenImagesList,
+                           final Kitchen kitchen) {
+        if (!kitchenImagesList.isEmpty()) {
+            kitchen.addImages(kitchenImagesList);
+        }
     }
 
     private void checkKitchenCustomerAndJwtCustomer(final Long userId, final Long kitchenCustomerId) {
@@ -126,17 +154,16 @@ public class CustomerMyPageService {
         }
     }
 
-    private void changeImages(final KitchenEdit kitchenEdit, final Kitchen kitchen) {
+    private List<CustomerTransformedSaveImage> changeImages(final KitchenEdit kitchenEdit, final Kitchen kitchen) {
         kitchen.getKitchenImagesList().clear();
 
         if (kitchenEdit.kitchenImagesRegisterList().isEmpty()) {
-            return;
+            return List.of();
         }
 
-        List<KitchenImages> kitchenImagesList = customerMyPageQueryInputPort.editImages(
+        return customerMyPageQueryInputPort.editImages(
                 kitchenEdit.kitchenImagesRegisterList(),
                 kitchen.getCustomer().getId());
-        kitchen.addImages(kitchenImagesList);
     }
 
     private void changeTools(final KitchenEdit kitchenEdit, final Kitchen kitchen) {
@@ -183,24 +210,49 @@ public class CustomerMyPageService {
     @Transactional
     public void editCustomer(final CustomerEdit customerEdit, final String token) {
 
-        if (Objects.isNull(customerEdit.phone()) && Objects.isNull(customerEdit.email())) {
+        boolean hasValidPhone = Objects.nonNull(customerEdit.phone()) && !customerEdit.phone().isEmpty();
+        boolean hasValidEmail = Objects.nonNull(customerEdit.email()) && !customerEdit.email().isEmpty();
+
+        if (!hasValidPhone && !hasValidEmail) {
             throw new InvalidRequestException(ErrorCode.CUSTOMER_EDIT_INVALID_INPUT);
         }
 
         Long userId = jwtService.getJwtUserId(token);
         Customer customer = customerMyPageQueryInputPort.getCustomerProfile(userId);
 
-        if (Objects.nonNull(customerEdit.phone())) {
-            customerMyPageQueryInputPort.checkPhoneAndAuthCode(customerEdit.phone(), customerEdit.phoneAuthNum(), CustomerVerificationStatus.EDIT);
-            customerMyPageQueryInputPort.deleteCustomerPhone(customerEdit.phone());
+        boolean phoneChangeCheck = updateField(
+                customer::getCustomerPhone,
+                customerEdit::phone,
+                (phone, currentPhone) -> customerMyPageQueryInputPort.checkPhoneAndAuthCode(phone, customerEdit.phoneAuthNum(), CustomerVerificationStatus.EDIT),
+                customerMyPageQueryInputPort::deleteCustomerPhone
+        );
+
+        boolean emailChangeCheck = updateField(
+                customer::getCustomerEmail,
+                customerEdit::email,
+                (email, currentEmail) -> customerMyPageQueryInputPort.checkEmailAndAuthCode(email, customerEdit.emailAuthNum(), CustomerVerificationStatus.EDIT),
+                customerMyPageQueryInputPort::deleteCustomerEmail
+        );
+
+        customer.edit(customerEdit, phoneChangeCheck, emailChangeCheck);
+    }
+
+    private boolean updateField(
+            Supplier<String> currentValueSupplier,
+            Supplier<String> newValueSupplier,
+            BiConsumer<String, String> checkAndAuthFunction,
+            Consumer<String> deleteFunction
+    ) {
+        String currentValue = currentValueSupplier.get();
+        String newValue = newValueSupplier.get();
+
+        if (Objects.nonNull(newValue) && !newValue.isEmpty()) {
+            checkAndAuthFunction.accept(newValue, currentValue);
+            deleteFunction.accept(newValue);
+            return true;
         }
 
-        if (Objects.nonNull(customerEdit.email())) {
-            customerMyPageQueryInputPort.checkEmailAndAuthCode(customerEdit.email(), customerEdit.emailAuthNum(), CustomerVerificationStatus.EDIT);
-            customerMyPageQueryInputPort.deleteCustomerEmail(customerEdit.email());
-        }
-
-        customer.edit(customerEdit);
+        return false;
     }
 
     public List<CustomerKitchenListResponse> getKitchenList(final String token) {

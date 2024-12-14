@@ -2,6 +2,7 @@ package com.mayo.server.account.domain.models;
 
 import static jakarta.persistence.FetchType.LAZY;
 
+import com.mayo.server.account.adapter.in.web.CustomerAccountEditRequest;
 import com.mayo.server.common.BaseTimeEntity;
 import com.mayo.server.customer.domain.model.Customer;
 import jakarta.persistence.Entity;
@@ -40,5 +41,10 @@ public class CustomerAccount extends BaseTimeEntity {
         this.bank = bank;
         this.account = account;
         this.customer = customer;
+    }
+
+    public void edit(final CustomerAccountEditRequest customerAccountEditRequest) {
+        this.bank = customerAccountEditRequest.bank();
+        this.account = customerAccountEditRequest.account();
     }
 }

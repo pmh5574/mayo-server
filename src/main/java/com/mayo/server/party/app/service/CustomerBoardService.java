@@ -16,6 +16,6 @@ public class CustomerBoardService {
     private final CustomerBoardQueryInputPort customerBoardQueryInputPort;
 
     public List<ChefSearch> getSearchChefAll(final CustomerPartySearchRequest customerPartySearchRequest) {
-        return customerBoardQueryInputPort.searchChefAll(customerPartySearchRequest.keyword());
+        return customerBoardQueryInputPort.searchChefAll(customerPartySearchRequest.categories(), customerPartySearchRequest.services(), customerPartySearchRequest.areas());
     }
 }

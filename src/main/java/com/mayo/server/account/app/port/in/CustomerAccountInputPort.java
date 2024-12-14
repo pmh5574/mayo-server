@@ -12,4 +12,6 @@ public interface CustomerAccountInputPort {
     CustomerAccount getAccount(Long userId);
 
     boolean checkAccountExists(Long userId);
+
+    void deleteAccount(CustomerAccount customerAccount);
 }

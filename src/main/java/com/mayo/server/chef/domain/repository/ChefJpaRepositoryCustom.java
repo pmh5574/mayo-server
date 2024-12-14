@@ -7,7 +7,7 @@ import java.util.List;
 
 public interface ChefJpaRepositoryCustom {
 
-    List<ChefSearch> getSearchListAll(String keyword);
-
     List<ChefNotSelectedDto> getChefNotSelectedList(List<PartySchedule> partyScheduleList);
+
+    List<ChefSearch> getSearchListAll(List<String> categories, List<String> services, List<String> areas);
 }

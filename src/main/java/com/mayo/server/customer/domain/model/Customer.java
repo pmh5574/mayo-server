@@ -12,7 +12,6 @@ import jakarta.persistence.OneToMany;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Objects;
 import lombok.AccessLevel;
 import lombok.Builder;
 import lombok.Getter;
@@ -70,15 +69,15 @@ public class Customer extends BaseTimeEntity {
         kitchen.addCustomer(this);
     }
 
-    public void edit(final CustomerEdit customerEdit) {
+    public void edit(final CustomerEdit customerEdit, final boolean phoneChangeCheck, final boolean emailChangeCheck) {
         this.customerName = customerEdit.name();
         this.customerBirthday = customerEdit.birthday();
 
-        if (Objects.nonNull(customerEdit.phone()) && Objects.nonNull(customerEdit.phoneAuthNum())) {
+        if (phoneChangeCheck) {
             this.customerPhone = customerEdit.phone();
         }
 
-        if (Objects.nonNull(customerEdit.email()) && Objects.nonNull(customerEdit.emailAuthNum())) {
+        if (emailChangeCheck) {
             this.customerEmail = customerEdit.email();
         }
     }

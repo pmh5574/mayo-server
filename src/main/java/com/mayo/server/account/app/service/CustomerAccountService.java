@@ -1,5 +1,6 @@
 package com.mayo.server.account.app.service;
 
+import com.mayo.server.account.adapter.in.web.CustomerAccountEditRequest;
 import com.mayo.server.account.adapter.in.web.CustomerAccountRequest;
 import com.mayo.server.account.adapter.out.persistence.CustomerAccountResponse;
 import com.mayo.server.account.app.port.in.CustomerAccountInputPort;
@@ -44,5 +45,21 @@ public class CustomerAccountService {
         Long userId = jwtService.getJwtUserId(token);
         CustomerAccount customerAccount = customerAccountInputPort.getAccount(userId);
         return new CustomerAccountResponse(customerAccount.getBank(), customerAccount.getAccount());
+    }
+
+    @Transactional
+    public void deleteAccount(final String token) {
+        Long userId = jwtService.getJwtUserId(token);
+
+        CustomerAccount customerAccount = customerAccountInputPort.getAccount(userId);
+        customerAccountInputPort.deleteAccount(customerAccount);
+    }
+
+    @Transactional
+    public void editAccount(final CustomerAccountEditRequest customerAccountEditRequest, final String token) {
+        Long userId = jwtService.getJwtUserId(token);
+
+        CustomerAccount customerAccount = customerAccountInputPort.getAccount(userId);
+        customerAccount.edit(customerAccountEditRequest);
     }
 }

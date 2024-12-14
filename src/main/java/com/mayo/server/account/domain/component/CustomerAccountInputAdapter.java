@@ -40,4 +40,9 @@ public class CustomerAccountInputAdapter implements CustomerAccountInputPort {
         return customerAccountRepository.findByCustomerId(userId)
                 .isPresent();
     }
+
+    @Override
+    public void deleteAccount(final CustomerAccount customerAccount) {
+        customerAccountRepository.delete(customerAccount);
+    }
 }

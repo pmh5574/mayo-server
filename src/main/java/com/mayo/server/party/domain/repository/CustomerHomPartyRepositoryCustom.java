@@ -8,6 +8,7 @@ import com.mayo.server.party.adapter.in.web.MyHomePartyListRequest;
 import com.mayo.server.party.adapter.out.persistence.PartyBoardResponse;
 import com.mayo.server.party.app.port.out.HomePartyDetail;
 import com.mayo.server.party.app.port.out.HomePartyFinishListDto;
+import com.mayo.server.party.app.port.out.HomePartyNoReviewFinishListDto;
 import com.mayo.server.party.domain.enums.HomePartyStatus;
 import com.mayo.server.party.domain.model.CustomerHomeParty;
 import java.util.List;
@@ -40,4 +41,6 @@ public interface CustomerHomPartyRepositoryCustom {
                                                     Pageable pageable);
 
     List<CustomerHomeParty> getStatusListByCustomerId(Long userId);
+
+    List<HomePartyNoReviewFinishListDto> getFinishPartyNoReviewList(Long userId, HomePartyStatus homePartyStatus);
 }

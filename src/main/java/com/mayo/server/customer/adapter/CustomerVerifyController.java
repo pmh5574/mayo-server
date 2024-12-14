@@ -159,7 +159,7 @@ public class CustomerVerifyController {
         return Response::new;
     }
 
-    @Operation(summary = "고객 휴대폰 회원가입시 인증번호")
+    @Operation(summary = "고객 휴대폰 수정시 인증번호 발송")
     @ApiResponse(responseCode = "200", content = {@Content(schema = @Schema(
             implementation = BaseResponse.class))})
     @PublicAccess
@@ -169,7 +169,7 @@ public class CustomerVerifyController {
         return Response::new;
     }
 
-    @Operation(summary = "고객 이메일 회원가입시 인증번호")
+    @Operation(summary = "고객 이메일 수정시 인증번호 발송")
     @ApiResponse(responseCode = "200", content = {@Content(schema = @Schema(
             implementation = BaseResponse.class))})
     @PublicAccess
