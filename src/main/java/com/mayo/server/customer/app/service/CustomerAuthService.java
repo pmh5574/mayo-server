@@ -7,15 +7,16 @@ import com.mayo.server.common.enums.UserType;
 import com.mayo.server.common.exception.DuplicateException;
 import com.mayo.server.common.exception.NotEqualException;
 import com.mayo.server.common.utility.PwdUtility;
-import com.mayo.server.customer.adapter.in.web.CustomerEmailRegisterRequest;
-import com.mayo.server.customer.adapter.in.web.CustomerLoginRequest;
 import com.mayo.server.customer.adapter.in.web.CustomerLogoutRequest;
-import com.mayo.server.customer.adapter.in.web.CustomerPasswordChange;
-import com.mayo.server.customer.adapter.in.web.CustomerPhoneRegisterRequest;
 import com.mayo.server.customer.adapter.in.web.ReissueAccessToken;
+import com.mayo.server.customer.app.port.in.CustomerAuthUseCase;
 import com.mayo.server.customer.app.port.in.CustomerEmailQueryInputPort;
 import com.mayo.server.customer.app.port.in.CustomerPhoneQueryInputPort;
 import com.mayo.server.customer.app.port.in.CustomerQueryInputPort;
+import com.mayo.server.customer.app.port.in.request.CustomerEmailRegisterServiceRequest;
+import com.mayo.server.customer.app.port.in.request.CustomerLoginServiceRequest;
+import com.mayo.server.customer.app.port.in.request.CustomerPasswordChangeServiceRequest;
+import com.mayo.server.customer.app.port.in.request.CustomerPhoneRegisterServiceRequest;
 import com.mayo.server.customer.domain.model.Customer;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -24,7 +25,7 @@ import org.springframework.transaction.annotation.Transactional;
 @RequiredArgsConstructor
 @Transactional(readOnly = true)
 @Service
-public class CustomerAuthService {
+public class CustomerAuthService implements CustomerAuthUseCase {
 
     private final JwtService jwtService;
     private final CustomerQueryInputPort customerQueryInputPort;
@@ -33,15 +34,11 @@ public class CustomerAuthService {
     private final CustomerVerifyService customerVerifyService;
 
     @Transactional
-    public JwtToken login(CustomerLoginRequest customerLoginRequest) {
-        String hashedPwd = PwdUtility.hash(customerLoginRequest.password());
-        Long id = getUserIdByUserType(customerLoginRequest, hashedPwd);
+    public JwtToken login(CustomerLoginServiceRequest request) {
+        String hashedPwd = PwdUtility.hash(request.password());
+        Long id = getUserIdByUserType(request, hashedPwd);
 
         return jwtService.createJwtToken(id, UserType.CUSTOMER);
-    }
-
-    private Long getUserIdByUserType(CustomerLoginRequest customerLoginRequest, String hashedPwd) {
-        return customerQueryInputPort.findByCustomerUsernameAndCustomerPassword(customerLoginRequest.username(), hashedPwd).getId();
     }
 
     @Transactional
@@ -55,13 +52,34 @@ public class CustomerAuthService {
     }
 
     @Transactional
-    public void registerByPhone(CustomerPhoneRegisterRequest customerPhoneRegisterRequest) {
-        duplicatedPhone(customerPhoneRegisterRequest.phone());
-        duplicatedUserId(customerPhoneRegisterRequest.userId());
-        validatePhoneAuthCode(customerPhoneRegisterRequest);
+    public void registerByPhone(CustomerPhoneRegisterServiceRequest request) {
+        duplicatedPhone(request.phone());
+        duplicatedUserId(request.userId());
+        validatePhoneAuthCode(request);
 
-        customerPhoneQueryInputPort.deleteCustomerPhone(customerPhoneRegisterRequest.phone());
-        customerQueryInputPort.postRegisterByPhone(customerPhoneRegisterRequest);
+        customerPhoneQueryInputPort.deleteCustomerPhone(request.phone());
+        customerQueryInputPort.postRegisterByPhone(request);
+    }
+
+    @Transactional
+    public void registerByEmail(CustomerEmailRegisterServiceRequest request) {
+        duplicatedEmail(request.email());
+        duplicatedUserId(request.userId());
+        validateEmailAuthCode(request);
+
+        customerEmailQueryInputPort.deleteCustomerEmail(request.email());
+        customerQueryInputPort.postRegisterByEmail(request);
+    }
+
+    @Transactional
+    public void patchPasswordChange(final CustomerPasswordChangeServiceRequest request) {
+        checkPasswordEqual(request.password(), request.passwordCheck());
+        Customer customer = customerQueryInputPort.findByUsername(request.userId());
+        customerQueryInputPort.updatePassword(customer, request.password());
+    }
+
+    private Long getUserIdByUserType(CustomerLoginServiceRequest request, String hashedPwd) {
+        return customerQueryInputPort.findByCustomerUsernameAndCustomerPassword(request.username(), hashedPwd).getId();
     }
 
     private void duplicatedPhone(String phone) {
@@ -78,29 +96,19 @@ public class CustomerAuthService {
         }
     }
 
-    private void validatePhoneAuthCode(CustomerPhoneRegisterRequest customerPhoneRegisterRequest) {
+    private void validatePhoneAuthCode(CustomerPhoneRegisterServiceRequest request) {
         boolean authCodeCheck = customerPhoneQueryInputPort.findByAuthCodeAndPhoneAndCheckRegister(
-                customerPhoneRegisterRequest.authCode(),
-                customerPhoneRegisterRequest.phone());
+                request.authCode(),
+                request.phone());
         if(!authCodeCheck) {
             throw new NotEqualException(ErrorCode.PHONE_AUTH_NUMBER_NOT_EQUALS);
         }
     }
 
-    @Transactional
-    public void registerByEmail(CustomerEmailRegisterRequest customerEmailRegisterRequest) {
-        duplicatedEmail(customerEmailRegisterRequest.email());
-        duplicatedUserId(customerEmailRegisterRequest.userId());
-        validateEmailAuthCode(customerEmailRegisterRequest);
-
-        customerEmailQueryInputPort.deleteCustomerEmail(customerEmailRegisterRequest.email());
-        customerQueryInputPort.postRegisterByEmail(customerEmailRegisterRequest);
-    }
-
-    private void validateEmailAuthCode(CustomerEmailRegisterRequest customerEmailRegisterRequest) {
+    private void validateEmailAuthCode(CustomerEmailRegisterServiceRequest request) {
         boolean authCodeCheck = customerEmailQueryInputPort.findByAuthCodeAndEmailAndCheckRegister(
-                customerEmailRegisterRequest.authCode(),
-                customerEmailRegisterRequest.email());
+                request.authCode(),
+                request.email());
         if (!authCodeCheck) {
             throw new NotEqualException(ErrorCode.EMAIL_AUTH_NUMBER_NOT_EQUALS);
         }
@@ -111,13 +119,6 @@ public class CustomerAuthService {
         if(!emailCheck) {
             throw new DuplicateException(ErrorCode.CUSTOMER_DUPLICATED_EMAIL);
         }
-    }
-
-    @Transactional
-    public void patchPasswordChange(final CustomerPasswordChange customerPasswordChange) {
-        checkPasswordEqual(customerPasswordChange.password(), customerPasswordChange.passwordCheck());
-        Customer customer = customerQueryInputPort.findByUsername(customerPasswordChange.userId());
-        customerQueryInputPort.updatePassword(customer, PwdUtility.hash(customerPasswordChange.password()));
     }
 
     private void checkPasswordEqual(final String password, final String passwordCheck) {

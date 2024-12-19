@@ -25,12 +25,13 @@ class CustomerRepositoryTest extends IntegrationTestSupport {
     @Test
     void findByCustomerUsernameAndCustomerPassword() {
         // given
-        String password = PwdUtility.hash("qwer1234");
+        String password = "qwer1234";
         String id = "test";
-        Customer customer1 = createCustomer(id, password, "", "", "", "");
+        Customer customer1 = createCustomer(id, password, "", "", "");
 
         // when
-        Optional<Customer> optionalCustomer = customerRepository.findByCustomerUsernameAndCustomerPassword(id, password);
+        Optional<Customer> optionalCustomer = customerRepository.findByCustomerUsernameAndCustomerPassword(id,
+                PwdUtility.hash(password));
 
         // then
         assertThat(optionalCustomer).isPresent();
@@ -42,9 +43,9 @@ class CustomerRepositoryTest extends IntegrationTestSupport {
     @Test
     void findByCustomerPhone() {
         // given
-        String password = PwdUtility.hash("qwer1234");
+        String password = "qwer1234";
         String phone = "01012341234";
-        Customer customer1 = createCustomer("test", password, phone, "", "", "");
+        Customer customer1 = createCustomer("test", password, phone, "", "");
 
         // when
         Optional<Customer> optionalCustomer = customerRepository.findByCustomerPhone(phone);
@@ -59,9 +60,9 @@ class CustomerRepositoryTest extends IntegrationTestSupport {
     @Test
     void findByCustomerUsername() {
         // given
-        String password = PwdUtility.hash("qwer1234");
+        String password = "qwer1234";
         String id = "test";
-        Customer customer1 = createCustomer(id, password, "", "", "", "");
+        Customer customer1 = createCustomer(id, password, "", "", "");
 
         // when
         Optional<Customer> optionalCustomer = customerRepository.findByCustomerUsername(id);
@@ -76,9 +77,9 @@ class CustomerRepositoryTest extends IntegrationTestSupport {
     @Test
     void findByCustomerEmail() {
         // given
-        String password = PwdUtility.hash("qwer1234");
+        String password = "qwer1234";
         String email = "test@test.com";
-        Customer customer1 = createCustomer("test", password, "", email, "", "");
+        Customer customer1 = createCustomer("test", password, "", email, "");
 
         // when
         Optional<Customer> optionalCustomer = customerRepository.findByCustomerEmail(email);
@@ -93,10 +94,10 @@ class CustomerRepositoryTest extends IntegrationTestSupport {
     @Test
     void findByCustomerPhoneAndCustomerName() {
         // given
-        String password = PwdUtility.hash("qwer1234");
+        String password = "qwer1234";
         String phone = "01012341234";
         String name = "홍기르동";
-        Customer customer1 = createCustomer("test", password, phone, "", name, "");
+        Customer customer1 = createCustomer("test", password, phone, "", name);
 
         // when
         Optional<Customer> optionalCustomer = customerRepository.findByCustomerPhoneAndCustomerName(phone, name);
@@ -112,10 +113,10 @@ class CustomerRepositoryTest extends IntegrationTestSupport {
     @Test
     void findByCustomerEmailAndCustomerName() {
         // given
-        String password = PwdUtility.hash("qwer1234");
+        String password = "qwer1234";
         String email = "test@test.com";
         String name = "홍기르동";
-        Customer customer1 = createCustomer("test", password, "", email, name, "");
+        Customer customer1 = createCustomer("test", password, "", email, name);
 
         // when
         Optional<Customer> optionalCustomer = customerRepository.findByCustomerEmailAndCustomerName(email, name);
@@ -131,12 +132,12 @@ class CustomerRepositoryTest extends IntegrationTestSupport {
     @Test
     void findByCustomerUsernameAndCustomerPhoneAndCustomerNameAndCustomerBirthday() {
         // given
-        String password = PwdUtility.hash("qwer1234");
+        String password = "qwer1234";
         String phone = "01012341234";
         String name = "홍기르동";
         String id = "test";
         String birthday = "19910101";
-        Customer customer1 = createCustomer(id, password, phone, "", name, birthday);
+        Customer customer1 = createCustomer(id, password, phone, "", name);
 
         // when
         Optional<Customer> optionalCustomer = customerRepository.findByCustomerUsernameAndCustomerPhoneAndCustomerNameAndCustomerBirthday(
@@ -158,12 +159,12 @@ class CustomerRepositoryTest extends IntegrationTestSupport {
     @Test
     void findByCustomerUsernameAndCustomerEmailAndCustomerNameAndCustomerBirthday() {
         // given
-        String password = PwdUtility.hash("qwer1234");
+        String password = "qwer1234";
         String email = "test@test.com";
         String name = "홍기르동";
         String id = "test";
         String birthday = "19910101";
-        Customer customer1 = createCustomer(id, password, "", email, name, birthday);
+        Customer customer1 = createCustomer(id, password, "", email, name);
 
         // when
         Optional<Customer> optionalCustomer = customerRepository.findByCustomerUsernameAndCustomerEmailAndCustomerNameAndCustomerBirthday(
@@ -185,10 +186,10 @@ class CustomerRepositoryTest extends IntegrationTestSupport {
     @Test
     void findByCustomerUsernameAndCustomerPhone() {
         // given
-        String password = PwdUtility.hash("qwer1234");
+        String password = "qwer1234";
         String id = "test";
         String phone = "01012341234";
-        Customer customer1 = createCustomer(id, password, phone, "", "", "");
+        Customer customer1 = createCustomer(id, password, phone, "", "");
 
         // when
         Optional<Customer> optionalCustomer = customerRepository.findByCustomerUsernameAndCustomerPhone(id, phone);
@@ -204,10 +205,10 @@ class CustomerRepositoryTest extends IntegrationTestSupport {
     @Test
     void findByCustomerUsernameAndCustomerEmail() {
         // given
-        String password = PwdUtility.hash("qwer1234");
+        String password = "qwer1234";
         String id = "test";
         String email = "test@test.com";
-        Customer customer1 = createCustomer(id, password, "", email, "", "");
+        Customer customer1 = createCustomer(id, password, "", email, "");
 
         // when
         Optional<Customer> optionalCustomer = customerRepository.findByCustomerUsernameAndCustomerEmail(id, email);
@@ -224,14 +225,14 @@ class CustomerRepositoryTest extends IntegrationTestSupport {
                                     final String password,
                                     final String phone,
                                     final String email,
-                                    final String name, final String birthday) {
+                                    final String name) {
         Customer customer = Customer.builder()
                 .customerUsername(userName)
                 .customerName(name)
                 .customerPhone(phone)
                 .customerEmail(email)
                 .customerPassword(password)
-                .customerBirthday(birthday)
+                .customerBirthday("19910101")
                 .build();
         return customerRepository.save(customer);
     }

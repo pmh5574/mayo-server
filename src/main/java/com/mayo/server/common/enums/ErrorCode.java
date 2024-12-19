@@ -48,6 +48,12 @@ public enum ErrorCode {
     INVALID_BIRTHDAY_NOT_EQUALS("INVALID_BIRTHDAY_NOT_EQUALS", "생년월일이 일치하지 않습니다."),
     INVALID_EMAIL_NAME_NOT_EQUALS("INVALID_EMAIL_NAME_REQUEST_ERROR", "이름과 이메일이 일치하지 않습니다."),
 
+    CUSTOMER_VALID_USER_ID("CUSTOMER_VALID_USER_ID", "아이디는 4~20자리의 영문자와 숫자 조합이어야 합니다."),
+    CUSTOMER_VALID_PASSWORD("CUSTOMER_VALID_PASSWORD", "비밀번호는 8~16자리의 영문 소문자와 숫자의 조합이어야 합니다."),
+    CUSTOMER_VALID_BIRTHDAY("CUSTOMER_VALID_BIRTHDAY", "생년월일은 YYYYMMDD 형식이어야 하며, 유효한 날짜여야 합니다."),
+    CUSTOMER_VALID_PHONE("CUSTOMER_VALID_PHONE", "휴대폰 번호는 하이픈이 없어야 하며, 10자리 또는 11자리 숫자여야 합니다."),
+    CUSTOMER_VALID_EMAIL("CUSTOMER_VALID_EMAIL", "유효한 이메일 주소를 입력해 주세요."),
+
     VERIFY_EXPIRED("VERIFY_EXPIRED", "인증번호가 만료 됐습니다."),
     JWT_NOT_FOUND_TOKEN("JWT_NOT_FOUND_TOKEN", "인증정보를 찾을 수 없습니다."),
     JWT_VALIDATE_ERROR("JWT_VALIDATE_ERROR", "유효한 인증정보가 아닙니다."),

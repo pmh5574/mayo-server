@@ -1,7 +1,7 @@
 package com.mayo.server.customer.app.port.in;
 
-import com.mayo.server.customer.adapter.in.web.CustomerEmailRegisterRequest;
-import com.mayo.server.customer.adapter.in.web.CustomerPhoneRegisterRequest;
+import com.mayo.server.customer.app.port.in.request.CustomerEmailRegisterServiceRequest;
+import com.mayo.server.customer.app.port.in.request.CustomerPhoneRegisterServiceRequest;
 import com.mayo.server.customer.domain.model.Customer;
 
 public interface CustomerQueryInputPort {
@@ -11,11 +11,11 @@ public interface CustomerQueryInputPort {
 
     boolean findByUsernameAndCheckRegister(String userId);
 
-    Long postRegisterByPhone(CustomerPhoneRegisterRequest customerPhoneRegisterRequest);
+    Long postRegisterByPhone(CustomerPhoneRegisterServiceRequest customerPhoneRegisterRequest);
 
     boolean findByEmailAndCheckRegister(String email);
 
-    Long postRegisterByEmail(CustomerEmailRegisterRequest customerEmailRegisterRequest);
+    Long postRegisterByEmail(CustomerEmailRegisterServiceRequest request);
 
     void checkIdFindByPhone(String phone);
 

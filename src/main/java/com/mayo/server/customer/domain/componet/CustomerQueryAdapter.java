@@ -3,10 +3,9 @@ package com.mayo.server.customer.domain.componet;
 import com.mayo.server.common.annotation.Adapter;
 import com.mayo.server.common.enums.ErrorCode;
 import com.mayo.server.common.exception.NotFoundException;
-import com.mayo.server.common.utility.PwdUtility;
-import com.mayo.server.customer.adapter.in.web.CustomerEmailRegisterRequest;
-import com.mayo.server.customer.adapter.in.web.CustomerPhoneRegisterRequest;
 import com.mayo.server.customer.app.port.in.CustomerQueryInputPort;
+import com.mayo.server.customer.app.port.in.request.CustomerEmailRegisterServiceRequest;
+import com.mayo.server.customer.app.port.in.request.CustomerPhoneRegisterServiceRequest;
 import com.mayo.server.customer.domain.model.Customer;
 import com.mayo.server.customer.domain.repository.CustomerRepository;
 import lombok.RequiredArgsConstructor;
@@ -34,13 +33,13 @@ public class CustomerQueryAdapter implements CustomerQueryInputPort {
     }
 
     @Override
-    public Long postRegisterByPhone(CustomerPhoneRegisterRequest customerPhoneRegisterRequest) {
+    public Long postRegisterByPhone(CustomerPhoneRegisterServiceRequest request) {
         return customerRepository.save(Customer.builder()
-                        .customerUsername(customerPhoneRegisterRequest.userId())
-                        .customerPassword(PwdUtility.hash(customerPhoneRegisterRequest.password()))
-                        .customerName(customerPhoneRegisterRequest.name())
-                        .customerBirthday(customerPhoneRegisterRequest.birthday())
-                        .customerPhone(customerPhoneRegisterRequest.phone())
+                        .customerUsername(request.userId())
+                        .customerPassword(request.password())
+                        .customerName(request.name())
+                        .customerBirthday(request.birthday())
+                        .customerPhone(request.phone())
                 .build())
                 .getId();
     }
@@ -51,13 +50,13 @@ public class CustomerQueryAdapter implements CustomerQueryInputPort {
     }
 
     @Override
-    public Long postRegisterByEmail(CustomerEmailRegisterRequest customerEmailRegisterRequest) {
+    public Long postRegisterByEmail(CustomerEmailRegisterServiceRequest request) {
         return customerRepository.save(Customer.builder()
-                        .customerUsername(customerEmailRegisterRequest.userId())
-                        .customerPassword(PwdUtility.hash(customerEmailRegisterRequest.password()))
-                        .customerName(customerEmailRegisterRequest.name())
-                        .customerBirthday(customerEmailRegisterRequest.birthday())
-                        .customerEmail(customerEmailRegisterRequest.email())
+                        .customerUsername(request.userId())
+                        .customerPassword(request.password())
+                        .customerName(request.name())
+                        .customerBirthday(request.birthday())
+                        .customerEmail(request.email())
                         .build())
                 .getId();
     }
