@@ -31,7 +31,6 @@ public class CustomerAuthService implements CustomerAuthUseCase {
     private final CustomerQueryInputPort customerQueryInputPort;
     private final CustomerPhoneQueryInputPort customerPhoneQueryInputPort;
     private final CustomerEmailQueryInputPort customerEmailQueryInputPort;
-    private final CustomerVerifyService customerVerifyService;
 
     @Transactional
     public JwtToken login(CustomerLoginServiceRequest request) {
